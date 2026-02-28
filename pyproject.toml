@@ -1,0 +1,10 @@
+[project]
+name = "find-your-stock"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "akshare>=1.18.30",
+    "pywencai>=0.13.1",
+]
