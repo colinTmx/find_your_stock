@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 人气热门股票整合工具
-支持：雪球热股榜、同花顺热榜、东方财富人气榜
+支持：雪球关注/讨论榜、同花顺热榜、东方财富人气榜
 """
 import akshare as ak
 import pandas as pd
@@ -9,13 +9,13 @@ from datetime import datetime
 from typing import Optional
 
 
-def get_xueqiu_hot_stocks(limit: int = 20) -> pd.DataFrame:
+def get_xueqiu_hot_follow(limit: int = 20) -> pd.DataFrame:
     """
-    雪球热股榜
+    雪球关注排行榜
     https://xueqiu.com/hq
     """
     try:
-        df = ak.stock_hot_deal_xq()
+        df = ak.stock_hot_follow_xq()
         if df is None or df.empty:
             return pd.DataFrame()
         if limit and len(df) > limit:
@@ -25,13 +25,38 @@ def get_xueqiu_hot_stocks(limit: int = 20) -> pd.DataFrame:
         result['排名'] = range(1, len(df)+1)
         result['代码'] = df.get('股票代码', '')
         result['名称'] = df.get('股票简称', '')
-        result['关注'] = df.get('关注', 0)
+        result['关注数'] = df.get('关注', 0)
         result['最新价'] = df.get('最新价', 0)
         result['平台'] = '雪球'
-        result['榜单类型'] = '热股榜'
+        result['榜单类型'] = '关注排行榜'
         return result
     except Exception as e:
-        print(f"❌ 雪球热股榜获取失败：{e}")
+        print(f"❌ 雪球关注排行榜获取失败：{e}")
+        return pd.DataFrame()
+
+
+def get_xueqiu_hot_tweet(limit: int = 20) -> pd.DataFrame:
+    """
+    雪球讨论排行榜
+    """
+    try:
+        df = ak.stock_hot_tweet_xq()
+        if df is None or df.empty:
+            return pd.DataFrame()
+        if limit and len(df) > limit:
+            df = df.head(limit)
+        
+        result = pd.DataFrame()
+        result['排名'] = range(1, len(df)+1)
+        result['代码'] = df.get('股票代码', '')
+        result['名称'] = df.get('股票简称', '')
+        result['讨论热度'] = df.get('讨论热度', 0)
+        result['最新价'] = df.get('最新价', 0)
+        result['平台'] = '雪球'
+        result['榜单类型'] = '讨论排行榜'
+        return result
+    except Exception as e:
+        print(f"❌ 雪球讨论排行榜获取失败：{e}")
         return pd.DataFrame()
 
 
@@ -100,7 +125,6 @@ def get_dongfang_popular_stocks(limit: int = 20) -> pd.DataFrame:
         if limit and len(df) > limit:
             df = df.head(limit)
         
-        # 检查是否有有效数据
         if '代码' not in df.columns or df['代码'].isna().all():
             return pd.DataFrame()
         
@@ -155,21 +179,17 @@ def merge_all_popular(
 ) -> pd.DataFrame:
     """
     整合所有平台的人气热门股票数据
-    
-    Args:
-        xueqiu: 是否包含雪球
-        tonghuashun: 是否包含同花顺
-        dongfang: 是否包含东方财富
-        limit_per_board: 每个榜单获取的股票数量
-    
-    Returns:
-        合并后的 DataFrame
     """
     all_dfs = []
     
     if xueqiu:
-        print("🔵 获取雪球热股榜...")
-        df = get_xueqiu_hot_stocks(limit_per_board)
+        print("🔵 获取雪球关注排行榜...")
+        df = get_xueqiu_hot_follow(limit_per_board)
+        if not df.empty:
+            all_dfs.append(df)
+        
+        print("💬 获取雪球讨论排行榜...")
+        df = get_xueqiu_hot_tweet(limit_per_board)
         if not df.empty:
             all_dfs.append(df)
     
