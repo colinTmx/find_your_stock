@@ -1,0 +1,21 @@
+{
+  "action": "add",
+  "job": {
+    "name": "投研晨间简报",
+    "schedule": {
+      "kind": "cron",
+      "expr": "0 8 * * *",
+      "tz": "Asia/Shanghai"
+    },
+    "sessionTarget": "isolated",
+    "wakeMode": "now",
+    "deleteAfterRun": false,
+    "payload": {
+      "kind": "agentTurn",
+      "message": "你是一个专业的投研助理。请执行以下任务：\n\n1. cd /root/find_your_stock\n2. uv run python src/morning_brief.py\n\n然后把生成的简报内容整理后发送给用户。要求：\n- 保持简洁专业的投研风格\n- 重点信息加粗\n- 不要回复 HEARTBEAT_OK\n- 直接输出简报内容",
+      "deliver": true,
+      "channel": "qqbot",
+      "to": "5B38E2C0E81E8E93D826196D6C2B86AE"
+    }
+  }
+}
